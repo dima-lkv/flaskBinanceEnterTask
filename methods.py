@@ -18,7 +18,7 @@ def createPieChart():
     for symbol in symbols:
         marker_cap_values.append(get_market_cap_by_ticker(symbol))
 
-    fig = go.Figure(data=[go.Pie(labels=symbols, values=marker_cap_values)])
+    fig = go.Figure(data=[go.Pie(symbols=symbols, values=marker_cap_values)])
     plotly.offline.plot(fig, filename=f'templates/pieChart.html', auto_open=False)
 
 
