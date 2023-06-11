@@ -22,6 +22,18 @@ This repository contains the codebase for a simple Flask application that fetche
 	`python app.py`
 5. Navigate to http://localhost:5000 in your browser to view the application.
 
+## Default settings
+By default, data will be collected for 1 hour every 5 minutes. However, you can change this in the methods.py file within the main function.
+
+The default code example is as follows:
+	`start_collecting(minutes_interval=5, hours=1)`
+
+The minutes_interval variable is responsible for chart renewal, where a value of 5 means the charts will be renewed every 5 minutes.
+The hours variable is a timer that determines how long data will be collected. You can change it to days or minutes.
+
+For example:
+	`start_collecting(minutes_interval=10, days=7)`
+In this case, data collection will be continuous for 7 days, and the charts will be renewed every 10 minutes.
 
 ### app.py: 
 The main application file. It sets up the Flask application and the routes for the different pages.
