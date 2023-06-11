@@ -8,7 +8,7 @@ def menu():
     return render_template('index.html')
 
 
-@app.route('/MCpieChart')
+@app.route('/pieChart')
 def pie_chart():
     return render_template('pieChart.html')
 
