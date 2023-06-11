@@ -12,8 +12,8 @@ scheduler = BlockingScheduler()
 
 
 def createPieChart():
-    symbols = ['Bitcoin', 'Ethereum', 'Solana', 'Tether', 'Tron', 'Dogecoin', 'Cardano', 'Litecoin', 'Polkadot',
-              'Uniswap']
+    symbols = ['bitcoin', 'ethereum', 'solana', 'tether', 'tron', 'dogecoin', 'cardano', 'litecoin', 'polkadot',
+              'uniswap']
     marker_cap_values = []
     for symbol in symbols:
         marker_cap_values.append(get_market_cap_by_ticker(symbol))

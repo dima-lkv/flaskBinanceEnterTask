@@ -1,5 +1,4 @@
 from flask import Flask, render_template
-from methods import start_collecting
 
 app = Flask(__name__)
 
@@ -25,4 +24,4 @@ def candle_stick1():
 
 
 if __name__ == '__main__':
-    app.run()
+    app.run(debug=True)
