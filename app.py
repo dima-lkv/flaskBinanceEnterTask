@@ -10,7 +10,7 @@ def menu():
 
 @app.route('/MCpieChart')
 def pie_chart():
-    return render_template('pie_chart.html')
+    return render_template('pieChart.html')
 
 
 @app.route('/candleStick/ETHUSDT/')

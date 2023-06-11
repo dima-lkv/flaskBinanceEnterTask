@@ -18,6 +18,7 @@ def get_market_cap_by_ticker(symbol):
         logging.warning(f'Rate limit exceeded continue in 1 minute')
         time.sleep(60)
         get_market_cap_by_ticker(symbol)
+        return
     data = response.json()
     try:
         circulating_supply = data['market_data']['circulating_supply']
@@ -37,6 +38,7 @@ def createPieChart():
 
     fig = go.Figure(data=[go.Pie(labels=symbols, values=marker_cap_values)])
     plotly.offline.plot(fig, filename=f'templates/pieChart.html', auto_open=False)
+    print(f'New pie chart successfully created | {datetime.now()}')
 
 
 def createCandleStick(symbol, crypto_data):
@@ -48,7 +50,7 @@ def createCandleStick(symbol, crypto_data):
         close=[data['Close price'] for data in crypto_data.values()],
     )])
     plotly.offline.plot(fig, filename=f'templates/{symbol}cs.html', auto_open=False)
-    # fig.show()
+    print(f'New candle stick for {symbol} successfully created | {datetime.now()}')
 
 
 def write_to_csv(symbol, data):
@@ -88,7 +90,6 @@ def get_crypto_data(startTime, endTime, symbol, interval):
         }
 
     createCandleStick(symbol, crypto_data)
-    createPieChart()
 
 
 def add_task(interval_minutes, startTime, endTime, symbols_list, interval):
@@ -125,12 +126,19 @@ def start_collecting(minutes_interval, days=None, hours=None, minutes=None):
     t.start()
     for symbol in symbols_list:
         get_crypto_data(startTime=startTime, endTime=endTime, symbol=symbol, interval=crypto_interval)
+    # add_task(minutes_interval, startTime, endTime, symbols_list, crypto_interval)
+    process1 = threading.Thread(target=add_task, args=[minutes_interval, startTime, endTime, symbols_list, crypto_interval])
+    process2 = threading.Thread(target=createPieChart)
 
-    add_task(minutes_interval, startTime, endTime, symbols_list, crypto_interval)
+    process1.start()
+    process2.start()
+
+    process1.join()
+    process2.join()
 
 
 def main():
-    start_collecting(minutes_interval=5, hours=1)
+    start_collecting(minutes_interval=5, minutes=1)
 
 
 if __name__ == '__main__':
