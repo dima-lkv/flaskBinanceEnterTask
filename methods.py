@@ -11,9 +11,26 @@ import plotly
 scheduler = BlockingScheduler()
 
 
+def get_market_cap_by_ticker(symbol):
+    url = f"https://api.coingecko.com/api/v3/coins/{symbol}"
+    response = requests.get(url)
+    if response.status_code != 200:
+        logging.warning(f'Rate limit exceeded continue in 1 minute')
+        time.sleep(60)
+        get_market_cap_by_ticker(symbol)
+    data = response.json()
+    try:
+        circulating_supply = data['market_data']['circulating_supply']
+        current_price = data['market_data']['current_price']['usd']
+        return round((current_price * circulating_supply) / 1000000000, 5)
+    except KeyError as e:
+        logging.warning(f'{symbol} not found. {e}')
+        raise e
+
+
 def createPieChart():
     symbols = ['bitcoin', 'ethereum', 'solana', 'tether', 'tron', 'dogecoin', 'cardano', 'litecoin', 'polkadot',
-              'uniswap']
+               'uniswap']
     marker_cap_values = []
     for symbol in symbols:
         marker_cap_values.append(get_market_cap_by_ticker(symbol))
@@ -74,18 +91,6 @@ def get_crypto_data(startTime, endTime, symbol, interval):
     createPieChart()
 
 
-def get_market_cap_by_ticker(symbol):
-    url = f"https://api.coingecko.com/api/v3/coins/{symbol}"
-    result = requests.get(url)
-    data = result.json()
-    try:
-        circulating_supply = data['market_data']['circulating_supply']
-        current_price = data['market_data']['current_price']['usd']
-        return round((current_price * circulating_supply) / 1000000000, 5)
-    except KeyError:
-        logging.warning(f'{symbol} not found.')
-
-
 def add_task(interval_minutes, startTime, endTime, symbols_list, interval):
     try:
         for symbol in symbols_list:
@@ -99,6 +104,11 @@ def add_task(interval_minutes, startTime, endTime, symbols_list, interval):
 
 
 def start_collecting(minutes_interval, days=None, hours=None, minutes=None):
+    symbols_list = ['BTCUSDT', 'ETHUSDT']
+    startTime = int((datetime.now() - timedelta(days=7)).timestamp() * 1000)
+    endTime = int((datetime.now()).timestamp() * 1000)
+    crypto_interval = '4h'
+
     def time_up():
         print("Finished.")
         scheduler.shutdown()
@@ -108,40 +118,20 @@ def start_collecting(minutes_interval, days=None, hours=None, minutes=None):
         time_limit = days * 24 * 60 * 60 if days else hours * 60 * 60
     else:
         time_limit = minutes * 60 if minutes else 60
-
-    tickers_list = ['BTCUSDT', 'ETHUSDT']
-    startTime = int((datetime.now() - timedelta(days=7)).timestamp() * 1000)
-    endTime = int((datetime.now()).timestamp() * 1000)
-    crypto_interval = '4h'
-    minutes_interval = minutes_interval
     logging.warning(
         f'Process started for {time_limit / 60 / 60} hour with interval every {minutes_interval} minute:\n{datetime.now()}\n...')
 
     t = threading.Timer(time_limit, time_up)
     t.start()
-    add_task(minutes_interval, startTime, endTime, tickers_list, crypto_interval)
+    for symbol in symbols_list:
+        get_crypto_data(startTime=startTime, endTime=endTime, symbol=symbol, interval=crypto_interval)
+
+    add_task(minutes_interval, startTime, endTime, symbols_list, crypto_interval)
 
 
 def main():
-    start_collecting(minutes_interval=1, hours=1)
+    start_collecting(minutes_interval=5, hours=1)
 
 
 if __name__ == '__main__':
     main()
-
-# tickers_list = ['BTCUSDT', 'ETHUSDT']
-# startTime = int((datetime.now() - timedelta(days=1)).timestamp() * 1000)
-# endTime = int((datetime.now()).timestamp() * 1000)
-# interval = '1h'
-#
-# for symbol in tickers_list:
-#     data = get_crypto_data(startTime, endTime, symbol, interval)
-#     write_output(symbol, data)
-
-# collected_crypto_data = {}
-# for symbol in tickers_list:
-#     collected_crypto_data[symbol] = get_crypto_data(startTime, endTime, symbol, interval)
-#
-# result = json.dumps(collected_crypto_data, indent=4)
-
-# print(result)
