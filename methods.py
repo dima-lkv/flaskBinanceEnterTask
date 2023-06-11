@@ -138,7 +138,7 @@ def start_collecting(minutes_interval, days=None, hours=None, minutes=None):
 
 
 def main():
-    start_collecting(minutes_interval=5, minutes=1)
+    start_collecting(minutes_interval=5, hours=1)
 
 
 if __name__ == '__main__':
